@@ -23,9 +23,15 @@ ode = ypp + A*y + B*x + C
 # rhs43 = rhs3.subs({C1:sols3[0][C1], C2:sols3[0][C2]})
 
 # This line combines the three [substitution + solve + back-substitution] steps into one by specifying the initial conditions right at the outset
-rhs4 = sm.dsolve(ode, y, ics={y.subs(x,0):0, yp.subs(x,0):0}).rhs
+rhs = sm.dsolve(ode, y, ics={y.subs(x,0):0, yp.subs(x,0):0}).rhs
 
-# conj = rhs3.args[0].args[1].args[0].args[0]-rhs3.args[0].args[1].args[0].args[1]
+# Nested set of methods to do the following:
+#   Turn sqrt(-A)'s into I*sqrt(A)
+#   Turn exp(I*x) into cos(x) + I*sin(x)
+#   Simplify
+rhs = sm.powdenest(rhs, force=True).rewrite(sm.cos).simplify()
+
+
 
 def my_eqns(x, A, B, C, k1, k2):
     y = B/A + k2*sm.sin(sm.sqrt(A)*x) + k1*sm.cos(sm.sqrt(A)*x) + x*C/A
